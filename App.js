@@ -8,45 +8,37 @@ import {
   Platform,
 } from "react-native";
 
+import { NavigationContainer, StackActions } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
+import HomeScreen from "./components/HomeScreen";
+import TodoList from "./components/TodoList";
+
+const Stack = createStackNavigator();
+
 export default function App() {
-
-  _onPressButton = () => {
-    alert('Apertou o botao!')
-  }
-
-
+  // _onPressButton = () => {
+  //   alert("Apertou o botao!");
+  // };
 
   return (
-    <View style={styles.container}>
-      <Text>Welcome Sérgio, your friends suck cock </Text>
-      <StatusBar style="auto" />
-      <TouchableNativeFeedback
-        onPress={this._onPressButton}
-        backgorund={
-          Platform.OS === "android"
-            ? TouchableNativeFeedback.SelectableBackground()
-            : ""
-        }
-      >
-        <View style={styles.button}>
-          <Text style={styles.buttonText}>
-            Meu Botao
-            {Platform.OS !== "android" ? "(Android Only)" : ""}
-          </Text>
-        </View>
-      </TouchableNativeFeedback>
-    </View>
+    <NavigationContainer>
+      <Stack.Navigator>
+          <Stack.Screen
+            name="Home"
+            component={HomeScreen}
+            options={{ title: "Welcome sucka" }}
+          />
+        <Stack.Screen
+          name="TodoList"
+          component={TodoList}
+          option={{ title: "Lista Tarefas" }}
+        />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
   button: {
     marginTop: 35,
     marginBottom: 30,
