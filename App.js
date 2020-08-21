@@ -12,6 +12,11 @@ import { NavigationContainer, StackActions } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import HomeScreen from "./components/HomeScreen";
 import TodoList from "./components/TodoList";
+import { createStore } from "redux";
+import { reducer } from "./src/reducers/reducer";
+import { Provider } from "react-redux";
+
+const store = createStore(reducer);
 
 const Stack = createStackNavigator();
 
@@ -21,20 +26,22 @@ export default function App() {
   // };
 
   return (
-    <NavigationContainer>
-      <Stack.Navigator>
+    <Provider store={store}>
+      <NavigationContainer>
+        <Stack.Navigator>
           <Stack.Screen
             name="Home"
             component={HomeScreen}
             options={{ title: "Welcome sucka" }}
           />
-        <Stack.Screen
-          name="TodoList"
-          component={TodoList}
-          option={{ title: "Lista Tarefas" }}
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
+          <Stack.Screen
+            name="TodoList"
+            component={TodoList}
+            option={{ title: "Lista Tarefas" }}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </Provider>
   );
 }
 

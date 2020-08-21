@@ -1,168 +1,242 @@
 import React, { useState } from "react";
 import {
-  StyleSheet,
   Text,
+  StyleSheet,
   View,
   FlatList,
   SafeAreaView,
   Modal,
   TouchableHighlight,
   TextInput,
-  TouchableWithoutFeedback,
   Picker,
 } from "react-native";
-import { Provider } from "react-redux";
-import { createStore } from "redux";
-import { reducer } from "../src/reducers/reducer";
+import UpdateModal from "./UpdateModal";
+//import { styles } from "../src/Styles";
+import { connect } from "react-redux";
 
-const store = createStore(reducer);
-
-
-const DATA = [
-  {
-    id: "adaeh-12dad-123adea",
-    title: "First Task",
-    statusCode: "todo",
-  },
-  {
-    id: "adaeh-12dad-123adea123",
-    title: "Second Task",
-    statusCode: "doing",
-  },
-  {
-    id: "adaeh-12dad-123adea312",
-    title: "Third Task",
-    statusCode: "done",
-  },
-];
-
-export default function TodoList(props) {
+function TodoList(props) {
   const [modalVis, setModalVis] = useState(false);
   const [InputDesc, setInputDesc] = useState("");
-  const [Status, setStatus] = useState({code: '', status: ''});
+  const [Status, setStatus] = useState("To Do");
 
   const renderTasks = ({ item }) => <Item item={item} />;
 
   const Item = ({ item }) => (
-    <View style={styles.item}>
+    <View style={styles.tarefa}>
       <Text style={styles.desc}>{item.title}</Text>
-      <View style={{width: '25%'}}>
-        <TouchableHighlight
-          onPress={(item) => _changeStatusCode(item)}
-          style={(styles.btnStatus, styles[item.statusCode])}
+      <View style={{ flexDirection: "row" }}>
+        <View
+          style={{
+            borderRadius: 5,
+            overflow: "hidden",
+            marginTop: 1.5,
+          }}
         >
-          <View>
-            <Text style={{color: 'white'}}>{item.statusCode}</Text>
-          </View>
-        </TouchableHighlight>
+          <TouchableHighlight
+            onPress={() => _changeStatusCode(item)}
+            style={(styles.btnStatus, styles[item.statusCode])}
+          >
+            <View>
+              <Text style={{ color: "white", textAlign: "center" }}>
+                {item.status}
+              </Text>
+            </View>
+          </TouchableHighlight>
+        </View>
+      </View>
+      <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
+        <View
+          style={{
+            borderRadius: 5,
+            overflow: "hidden",
+            marginTop: 1.5,
+            marginRight: 3,
+          }}
+        >
+          <TouchableHighlight
+            underlayColor={"white"}
+            style={{ backgroundColor: "red", paddingHorizontal: 5 }}
+            onPress={() => {
+              props.dispatch({ type: "delete/item", item: item });
+            }}
+          >
+            <View>
+              <Text style={{ color: "white", textAlign: "center" }}>X</Text>
+            </View>
+          </TouchableHighlight>
+        </View>
+
+        <View
+          style={{
+            borderRadius: 5,
+            overflow: "hidden",
+            marginTop: 1.5,
+          }}
+        >
+          <TouchableHighlight
+            underlayColor={"white"}
+            style={{ backgroundColor: "blue", paddingHorizontal: 5 }}
+            onPress={() => {
+              props.dispatch({ type: "open/modal", item: item });
+            }}
+          >
+            <View>
+              <Text style={{ color: "white", textAlign: "center" }}>A</Text>
+            </View>
+          </TouchableHighlight>
+        </View>
       </View>
     </View>
   );
 
+  /**
+   * This is to toggle the modal visibility
+   */
+  const _toggleModal = () => {
+    setModalVis(!modalVis);
+  };
+
+  /**
+   * This is to set the Status in a Oderly Pattern, also calling dispatch and
+   * changing the state of the item.
+   * @param {Object} item
+   */
   const _changeStatusCode = (item) => {
     let newCode = "";
-    switch (item.statusCode) {
-      case "todo":
+    let newStatus = "";
+
+    switch (item.status) {
+      case "To Do":
+        newStatus = "Doing";
         newCode = "doing";
         break;
-      case "doing":
+      case "Doing":
+        newStatus = "Done";
         newCode = "done";
         break;
-      case "done":
+      case "Done":
+        newStatus = "To Do";
         newCode = "todo";
         break;
+      default:
+        newStatus = "To Do";
+        newCode = "todo";
     }
-
     let updatedItem = {
       ...item,
-      statusCode: newCode
-    }
+      status: newStatus,
+      statusCode: newCode,
+    };
 
-    //props.dispatch({type: 'update/item'}, updatedItem);
+    props.dispatch({ type: "update/item", item: updatedItem });
   };
 
   return (
-    <Provider store={store}>
-      <SafeAreaView>
-        <View style={styles.container}>
-          <Modal animationType="slide" transparent={true} visible={modalVis}>
-            <View style={styles.centeredView}>
-              <Text style={{ color: "white", fontSize: 25 }}>
-                Add a new Task to the List
-              </Text>
-              <View style={styles.modalView}>
-                <Text>Description</Text>
-                <TextInput
-                  style={styles.input}
-                  editable
-                  onChangeText={(text) => setInputDesc(text)}
-                  value={InputDesc}
-                />
-                <Text>Set the status</Text>
-                <Picker
-                  selectedValue={Status}
-                  onValueChange={(itemValue, itemIndex) => setStatus(itemValue, itemIndex)}
-                  style={{ height: 50, width: "30%" }}
-                >
-                  <Picker.Item label="To Do" value="todo" />
-                  <Picker.Item label="Doing" value="doing" />
-                  <Picker.Item label="Done" value="done" />
-                </Picker>
-                <View
-                  style={{
-                    borderRadius: 10,
-                    overflow: "hidden",
-                    width: "100%",
+    <SafeAreaView>
+      <View>
+        <UpdateModal />
+      </View>
+      <View style={styles.container}>
+        {/* Start Modal */}
+        <Modal animationType="slide" transparent={true} visible={modalVis}>
+          <View style={styles.centeredView}>
+            <Text style={{ color: "white", fontSize: 25 }}>
+              Add a new Task to the List
+            </Text>
+            <View style={styles.modalView}>
+              <Text>Description</Text>
+              <TextInput
+                style={styles.input}
+                editable
+                onChangeText={(text) => setInputDesc(text)}
+                value={InputDesc}
+              />
+              <Text>Set the status</Text>
+              <Picker
+                selectedValue={Status}
+                onValueChange={(itemValue, itemIndex) =>
+                  setStatus(itemValue, itemIndex)
+                }
+                style={{ height: 50, width: "30%" }}
+              >
+                <Picker.Item label="To Do" value="To Do" />
+                <Picker.Item label="Doing" value="Doing" />
+                <Picker.Item label="Done" value="Done" />
+              </Picker>
+              <View
+                style={{
+                  borderRadius: 10,
+                  overflow: "hidden",
+                  width: "100%",
+                }}
+              >
+                <TouchableHighlight
+                  style={styles.addBtn}
+                  underlayColor={"#12ED66"}
+                  onPress={() => {
+                    let newItem = {
+                      title: InputDesc,
+                      status: Status,
+                      statusCode: Status.replace(" ", "").toLowerCase(),
+                      id: (Math.random() * 10).toString(),
+                    };
+                    props.dispatch({ type: "add/item", item: newItem });
+                    _toggleModal();
+                    setInputDesc("");
                   }}
                 >
-                  <TouchableHighlight
-                    style={styles.addBtn}
-                    underlayColor={"#12ED66"}
-                    onPress={() => {
-                      let newItem = {
-                        title: InputDesc,
-                        statusCode: Status,
-                        id: (Math.random() * 10).toFixed(4),
-                      };
-                      console.log(newItem);
-                      props.dispatch({type: 'item/save'}, newItem);
-                    }}
-                  >
-                    <View>
-                      <Text>Add New Task</Text>
-                    </View>
-                  </TouchableHighlight>
-                </View>
+                  <View>
+                    <Text>Add New Task</Text>
+                  </View>
+                </TouchableHighlight>
               </View>
-              <TouchableHighlight onPress={() => setModalVis(false)}>
-                <View>
-                  <Text style={{ color: "white" }}>X</Text>
-                </View>
-              </TouchableHighlight>
             </View>
-          </Modal>
+            <TouchableHighlight onPress={() => setModalVis(false)}>
+              <View
+                style={{
+                  backgroundColor: "red",
+                  borderRadius: 5,
+                  overflow: "hidden",
+                }}
+              >
+                <Text
+                  style={{ color: "white", width: 20, textAlign: "center" }}
+                >
+                  X
+                </Text>
+              </View>
+            </TouchableHighlight>
+          </View>
+        </Modal>
 
-          <Text style={styles.title}>Lista To Do 2</Text>
-          <FlatList
-            style={styles.list}
-            data={DATA}
-            renderItem={renderTasks}
-            keyExtractor={(item) => item.id}
-          />
-          <TouchableHighlight
-            underlayColor={"#12ED66"}
-            style={styles.addBtn}
-            onPress={() => setModalVis(!modalVis)}
-          >
-            <View>
-              <Text>Add Task</Text>
-            </View>
-          </TouchableHighlight>
-        </View>
-      </SafeAreaView>
-    </Provider>
+        <FlatList
+          style={styles.list}
+          data={props.items}
+          renderItem={renderTasks}
+          keyExtractor={(item) => {
+            item.id;
+          }}
+        />
+        <TouchableHighlight
+          underlayColor={"#12ED66"}
+          style={styles.addBtn}
+          onPress={() => setModalVis(!modalVis)}
+        >
+          <View>
+            <Text>Add Task</Text>
+          </View>
+        </TouchableHighlight>
+      </View>
+    </SafeAreaView>
   );
 }
+
+const MapStateToProps = (state) => {
+  return {
+    ...state,
+    items: state.items,
+  };
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -177,11 +251,11 @@ const styles = StyleSheet.create({
   title: {
     margin: 5,
   },
-  item: {
+  tarefa: {
     flexDirection: "row",
     padding: 20,
     marginVertical: 8,
-    justifyContent: "center",
+    justifyContent: "space-between",
     alignSelf: "center",
     width: "85%",
     backgroundColor: "white",
@@ -189,6 +263,7 @@ const styles = StyleSheet.create({
   },
   desc: {
     fontSize: 15,
+    fontWeight: "bold",
     marginRight: 10,
   },
   centeredView: {
@@ -222,6 +297,8 @@ const styles = StyleSheet.create({
     elevation: 2,
     justifyContent: "center",
     alignItems: "center",
+    borderTopRightRadius: 8,
+    borderTopLeftRadius: 8,
   },
   input: {
     height: 40,
@@ -229,6 +306,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     width: 100,
     textAlign: "center",
+    marginBottom: 10,
   },
 
   btnStatus: {
@@ -241,13 +319,18 @@ const styles = StyleSheet.create({
 
   todo: {
     backgroundColor: "red",
+    paddingHorizontal: 5,
   },
 
   doing: {
     backgroundColor: "orange",
+    paddingHorizontal: 5,
   },
 
   done: {
     backgroundColor: "green",
+    paddingHorizontal: 5,
   },
 });
+
+export default connect(MapStateToProps)(TodoList);
