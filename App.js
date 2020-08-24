@@ -19,7 +19,7 @@ import { Provider } from "react-redux";
 const store = createStore(reducer);
 
 const Stack = createStackNavigator();
-
+  
 export default function App() {
   // _onPressButton = () => {
   //   alert("Apertou o botao!");

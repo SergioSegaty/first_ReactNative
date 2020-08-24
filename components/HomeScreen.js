@@ -10,7 +10,7 @@ import {
 export default function HomeScreen({navigation}) {
   return (
     <View style={styles.container}>
-      <Text>Welcome Sérgio, your friends suck cock </Text>
+      <Text>Welcome</Text>
       
       <Button
       style={styles.button}
