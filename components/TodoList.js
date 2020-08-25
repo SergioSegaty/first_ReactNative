@@ -214,7 +214,7 @@ function TodoList(props) {
           data={props.items}
           renderItem={renderTasks}
           keyExtractor={(item) => {
-            item.id;
+           return item.id;
           }}
         />
         <TouchableHighlight

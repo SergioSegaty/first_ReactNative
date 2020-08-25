@@ -13,13 +13,23 @@ import { createStackNavigator } from "@react-navigation/stack";
 import HomeScreen from "./components/HomeScreen";
 import TodoList from "./components/TodoList";
 import { createStore } from "redux";
-import { reducer } from "./src/reducers/reducer";
 import { Provider } from "react-redux";
-
-const store = createStore(reducer);
+import { persistStore, persistReducer } from "redux-persist";
+import AsyncStorage from "@react-native-community/async-storage";
+import { reducer } from "./src/reducers/reducer";
+import { PersistGate } from "redux-persist/integration/react";
 
 const Stack = createStackNavigator();
-  
+
+const persistConfig = {
+  key: "root",
+  storage: AsyncStorage,
+};
+
+const persistedReducer = persistReducer(persistConfig, reducer);
+let store = createStore(persistedReducer);
+let persistor = persistStore(store);
+
 export default function App() {
   // _onPressButton = () => {
   //   alert("Apertou o botao!");
@@ -27,20 +37,22 @@ export default function App() {
 
   return (
     <Provider store={store}>
-      <NavigationContainer>
-        <Stack.Navigator>
-          <Stack.Screen
-            name="Home"
-            component={HomeScreen}
-            options={{ title: "Welcome sucka" }}
-          />
-          <Stack.Screen
-            name="TodoList"
-            component={TodoList}
-            option={{ title: "Lista Tarefas" }}
-          />
-        </Stack.Navigator>
-      </NavigationContainer>
+      <PersistGate loading={null} persistor={persistor}>
+        <NavigationContainer>
+          <Stack.Navigator>
+            <Stack.Screen
+              name="Home"
+              component={HomeScreen}
+              options={{ title: "Welcome sucka" }}
+            />
+            <Stack.Screen
+              name="TodoList"
+              component={TodoList}
+              option={{ title: "Lista Tarefas" }}
+            />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </PersistGate>
     </Provider>
   );
 }
